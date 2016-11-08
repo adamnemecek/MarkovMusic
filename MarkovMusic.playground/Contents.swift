@@ -33,6 +33,49 @@ struct MarkovNote {
     
 }
 
+func createSong(url: URL) -> Song? {
+    
+    var sequence: MusicSequence?
+    let status = NewMusicSequence(&sequence)
+    
+    let name = url.lastPathComponent
+    
+    if status == OSStatus(noErr) {
+        
+        MusicSequenceFileLoad(sequence!, url as CFURL, MusicSequenceFileTypeID(rawValue: 0)!, .smf_ChannelsToTracks)
+        var tempoTrack: MusicTrack?
+        MusicSequenceGetTempoTrack(sequence!, &tempoTrack)
+        
+        let tempo = parseTempoTrack(track: tempoTrack!)
+        
+        var trackCount:UInt32 = 0
+        MusicSequenceGetTrackCount(sequence!, &trackCount)
+        
+        var tracks: [Track] = []
+        
+        for i in 0..<trackCount {
+            
+            var trackData: MusicTrack?
+            MusicSequenceGetIndTrack(sequence!, i, &trackData)
+            
+            let track = Track(name: "\(i)", notes: parseTrack(track: trackData!))
+            
+            tracks.append(track)
+            
+        }
+        
+        let song: Song = Song(name: name, tempo: tempo!, tracks: tracks)
+        
+        return song
+        
+    } else {
+        
+        return nil
+        
+    }
+    
+}
+
 func parseTrack(track: MusicTrack) -> [Note] {
     
     var iterator: MusicEventIterator?
