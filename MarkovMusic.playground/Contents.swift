@@ -154,3 +154,61 @@ func parseTempoTrack(track: MusicTrack) -> Float64? {
     
     return nil
 }
+
+func createMarkovNote(track: Track) -> MarkovNote {
+    
+    var noteDict = [UInt8: [UInt8]]()
+    var velocityDict = [UInt8: [UInt8]]()
+    var durationDict = [Float: [Float]]()
+    
+    for f in track.notes {
+        noteDict[f.note] = []
+        velocityDict[f.velocity] = []
+        durationDict[f.duration] = []
+    }
+    
+    var noteArr: [UInt8] = []
+    var velocityArr: [UInt8] = []
+    var durationArr: [Float] = []
+    
+    for (index, item) in noteDict.enumerated() {
+        for (noteIndex, noteItem) in track.notes.enumerated() {
+            if item.key == noteItem.note && noteIndex < track.notes.count - 1 {
+                noteArr.append(track.notes[noteIndex + 1].note)
+            }
+        }
+        
+        noteDict[item.key] = noteArr
+        noteArr = []
+        
+    }
+    
+    for (index, item) in velocityDict.enumerated() {
+        for (velocityIndex, velocityItem) in track.notes.enumerated() {
+            if item.key == velocityItem.velocity && velocityIndex < track.notes.count - 1 {
+                velocityArr.append(track.notes[velocityIndex + 1].velocity)
+            }
+        }
+        
+        velocityDict[item.key] = velocityArr
+        velocityArr = []
+        
+    }
+    
+    for (index, item) in durationDict.enumerated() {
+        for (durationIndex, durationItem) in track.notes.enumerated() {
+            if item.key == durationItem.duration && durationIndex < track.notes.count - 1 {
+                durationArr.append(track.notes[durationIndex + 1].duration)
+            }
+        }
+        
+        durationDict[item.key] = durationArr
+        durationArr = []
+        
+    }
+    
+    let returnMarkov = MarkovNote(noteDict: noteDict, velocityDict: velocityDict, durationDict: durationDict)
+    
+    return returnMarkov
+    
+}
