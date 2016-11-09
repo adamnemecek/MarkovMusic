@@ -212,3 +212,72 @@ func createMarkovNote(track: Track) -> MarkovNote {
     return returnMarkov
     
 }
+
+func nextNote(markov: MarkovNote, note: Note) -> Note {
+    
+    var noteNum: UInt8 = UInt8(arc4random_uniform(128))
+    var velocityNum: UInt8 = UInt8(arc4random_uniform(128))
+    var durationNum: Float = Float(arc4random_uniform(2))
+    
+    for f in markov.noteDict {
+        
+        if f.key == note.note {
+            
+            let randomIndex = Int(arc4random_uniform(UInt32(f.value.count)))
+            noteNum = f.value[randomIndex]
+            
+        }
+        
+    }
+    
+    for f in markov.velocityDict {
+        
+        if f.key == note.velocity {
+            
+            let randomIndex = Int(arc4random_uniform(UInt32(f.value.count)))
+            velocityNum = f.value[randomIndex]
+            
+        }
+        
+    }
+    
+    for f in markov.durationDict {
+        
+        if f.key == note.duration {
+            
+            let randomIndex = Int(arc4random_uniform(UInt32(f.value.count)))
+            durationNum = f.value[randomIndex]
+            
+        }
+        
+    }
+    
+    let returnNote: Note = Note(note: noteNum, velocity: velocityNum, duration: durationNum)
+    
+    print(returnNote)
+    
+    return returnNote
+    
+}
+
+let path = Bundle.main.path(forResource: "d_bunny", ofType: "mid")!
+let url = URL(fileURLWithPath: path)
+
+if let song = createSong(url: url) {
+    
+    for f in song.tracks {
+        
+        for g in f.notes {
+            
+            let markovNoteChain = createMarkovNote(track: f)
+            nextNote(markov: markovNoteChain, note: g)
+            
+        }
+        
+    }
+    
+} else {
+    
+    print("No song")
+    
+}
